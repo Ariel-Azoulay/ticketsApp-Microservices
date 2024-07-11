@@ -1,8 +1,11 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(
-  "sk_test_51PaExe2LrTUkiI1LtFnwvJZfKvOepJg2TR9vJOISDn07MKccMpmhOG8LqADiapktBXHbTfAg7xZG9Pxplsjqby4400VgxE2I5g",
-  {
-    apiVersion: "2022-11-15",
-  }
-);
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error("STRIPE_SECRET_KEY must be defined");
+}
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-06-20",
+});
+
+export { stripe };
