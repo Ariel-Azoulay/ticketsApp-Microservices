@@ -21,7 +21,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: NATS_URL
-              value: "nats://nats-srv:4222" # Use nats:// protocol instead of http:// for NATS
+              value: "nats://nats-srv:4222"
             - name: NATS_CLUSTER_ID
               value: ticketing
             - name: MONGO_URI
@@ -31,19 +31,8 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
-            - name: STRIPE_KEY
+            - name: STRIPE_SECRET_KEY
               valueFrom:
                 secretKeyRef:
                   name: stripe-secret
-                  key: STRIPE_KEY
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: payments-srv
-spec:
-  selector:
-    app: payments
-  ports:
-    - port: 3000
-      targetPort: 3000
+                  key: STRIPE_SECRET_KEY

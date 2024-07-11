@@ -1,4 +1,5 @@
-import mongoose from 'mongoose';
+// src/models/payment.ts
+import mongoose from "mongoose";
 
 interface PaymentAttrs {
   orderId: string;
@@ -17,12 +18,12 @@ interface PaymentModel extends mongoose.Model<PaymentDoc> {
 const paymentSchema = new mongoose.Schema(
   {
     orderId: {
-      required: true,
       type: String,
+      required: true,
     },
     stripeId: {
-      required: true,
       type: String,
+      required: true,
     },
   },
   {
@@ -40,7 +41,7 @@ paymentSchema.statics.build = (attrs: PaymentAttrs) => {
 };
 
 const Payment = mongoose.model<PaymentDoc, PaymentModel>(
-  'Payment',
+  "Payment",
   paymentSchema
 );
 

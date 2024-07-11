@@ -1,11 +1,11 @@
-import mongoose from 'mongoose';
-import { updateIfCurrentPlugin } from 'mongoose-update-if-current';
-import { OrderStatus } from '@aaztickets2/common';
+import { OrderStatus } from "@aaztickets2/common";
+import mongoose from "mongoose";
+import { updateIfCurrentPlugin } from "mongoose-update-if-current";
 
 interface OrderAttrs {
   id: string;
   version: number;
-  userId: string;
+  userId: string; // Corrected type to string
   price: number;
   status: OrderStatus;
 }
@@ -34,6 +34,7 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true,
+      enum: Object.values(OrderStatus),
     },
   },
   {
@@ -46,9 +47,6 @@ const orderSchema = new mongoose.Schema(
   }
 );
 
-orderSchema.set('versionKey', 'version');
-orderSchema.plugin(updateIfCurrentPlugin);
-
 orderSchema.statics.build = (attrs: OrderAttrs) => {
   return new Order({
     _id: attrs.id,
@@ -59,6 +57,9 @@ orderSchema.statics.build = (attrs: OrderAttrs) => {
   });
 };
 
-const Order = mongoose.model<OrderDoc, OrderModel>('Order', orderSchema);
+orderSchema.set("versionKey", "version");
+orderSchema.plugin(updateIfCurrentPlugin);
+
+const Order = mongoose.model<OrderDoc, OrderModel>("Order", orderSchema);
 
 export { Order };

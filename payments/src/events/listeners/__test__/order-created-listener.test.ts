@@ -1,47 +1,60 @@
-import mongoose from 'mongoose';
-import { Message } from 'node-nats-streaming';
-import { OrderCreatedEvent, OrderStatus } from '@aaztickets2/common';
-import { natsWrapper } from '../../../nats-wrapper';
-import { OrderCreatedListener } from '../order-created-listener';
-import { Order } from '../../../models/order';
+import { OrderCreatedEvent, OrderStatus } from "@aaztickets2/common";
+import { OrderCreatedListener } from "../order-creates-listener";
+import { natsWrapper } from "../../../nats-wrapper"; // Example import for NATS wrapper
+import mongoose from "mongoose";
+import { Message } from "node-nats-streaming";
+import { Order } from "../../../models/order";
+
+// Mock the queueGroupName function
+jest.mock("../queue-group-name", () => {
+  return {
+    queueGroupName: "test-queue-group",
+  };
+});
+
+// Mock natsWrapper
+jest.mock("../../../nats-wrapper");
 
 const setup = async () => {
   const listener = new OrderCreatedListener(natsWrapper.client);
 
-  const data: OrderCreatedEvent['data'] = {
+  const data: OrderCreatedEvent["data"] = {
     id: new mongoose.Types.ObjectId().toHexString(),
     version: 0,
-    expiresAt: 'alskdjf',
-    userId: 'alskdjf',
+    expiresAt: new Date().toISOString(),
+    userId: new mongoose.Types.ObjectId().toHexString(),
     status: OrderStatus.Created,
     ticket: {
-      id: 'alskdfj',
-      price: 10,
+      id: new mongoose.Types.ObjectId().toHexString(),
+      price: 11,
     },
   };
 
-  // @ts-ignore
-  const msg: Message = {
+  const msg: Partial<Message> = {
     ack: jest.fn(),
   };
 
   return { listener, data, msg };
 };
 
-it('replicates the order info', async () => {
-  const { listener, data, msg } = await setup();
+describe("OrderCreatedListener", () => {
+  it("replicates order info", async () => {
+    const { listener, data, msg } = await setup();
 
-  await listener.onMessage(data, msg);
+    await listener.onMessage(data, msg as Message);
 
-  const order = await Order.findById(data.id);
+    const order = await Order.findById(data.id);
 
-  expect(order!.price).toEqual(data.ticket.price);
-});
+    expect(order).toBeDefined();
+    expect(order!.price).toEqual(data.ticket.price);
+    expect(order!.status).toEqual(data.status);
+  });
 
-it('acks the message', async () => {
-  const { listener, data, msg } = await setup();
+  it("acks the message", async () => {
+    const { listener, data, msg } = await setup();
 
-  await listener.onMessage(data, msg);
+    await listener.onMessage(data, msg as Message);
 
-  expect(msg.ack).toHaveBeenCalled();
+    expect(msg.ack).toHaveBeenCalled();
+  });
 });
